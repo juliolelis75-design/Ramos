@@ -1,0 +1,790 @@
+// App.tsx
+import React, { useMemo, useState } from "react";
+import { Helmet } from "react-helmet";
+import {
+  Battery as BatteryIcon,
+  Phone,
+  Clock,
+  MapPin,
+  Wrench,
+  ShieldCheck,
+  Zap,
+  ChevronDown,
+  ChevronRight,
+  MessageSquare,
+  Filter,
+  Car,
+  Facebook,
+  Instagram,
+} from "lucide-react";
+
+// Paleta
+const COLORS = {
+  primary: "#d32f2f",
+  primaryDark: "#b71c1c",
+  secondary: "#16a34a",
+  secondaryDark: "#15803d",
+  textDark: "#0f172a",
+  text: "#1f2937",
+  textMuted: "#6b7280",
+  bg: "#ffffff",
+  bgAlt: "#f8fafc",
+};
+
+// Assets (Drive)
+const LOGO_URL =
+  "https://drive.google.com/uc?export=view&id=1hWcrLMdjqd_CUMG5Lu7sYhkMC0c8OCgq";
+const HERO_IMG_1 =
+  "https://drive.google.com/uc?export=view&id=1q8VwpmezZr9oWQFtZkkG4uqUE3Y_dBjE";
+const HERO_IMG_2 =
+  "https://drive.google.com/uc?export=view&id=1J0YhQKZqKWMj4DlKD1ly-PaPFigMsbDO";
+
+// Catálogo (mock)
+const BRANDS = ["Moura", "Tudor", "Zetta", "Cral", "Júpiter", "Sedna", "Ômega"];
+const BATTERIES = [
+  { id: 1, brand: "Moura", model: "60Ah", ah: 60, guarantee: "24 meses", fit: "Vários (linha leve)" },
+  { id: 2, brand: "Tudor", model: "60Ah", ah: 60, guarantee: "24 meses", fit: "Vários (linha leve)" },
+  { id: 3, brand: "Cral", model: "45Ah", ah: 45, guarantee: "18 meses", fit: "HB20/Ka e similares" },
+  { id: 4, brand: "Sedna", model: "60Ah", ah: 60, guarantee: "12 meses", fit: "Custo–benefício" },
+  { id: 5, brand: "Júpiter", model: "45Ah", ah: 45, guarantee: "Consultar", fit: "Compactos" },
+  { id: 6, brand: "Moura", model: "100Ah", ah: 100, guarantee: "24 meses", fit: "Utilitários / pesada" },
+  { id: 7, brand: "Tudor", model: "100Ah", ah: 100, guarantee: "15 meses", fit: "Utilitários / pesada" },
+  { id: 8, brand: "Júpiter", model: "100Ah", ah: 100, guarantee: "12 meses", fit: "Linha pesada" },
+];
+
+const MENU = [
+  { key: "home", label: "Página inicial" },
+  { key: "baterias", label: "Baterias" },
+  { key: "sobre", label: "Sobre nós" },
+  { key: "contato", label: "Contato" },
+];
+
+function WhatsAppButton({ className = "" }: { className?: string }) {
+  const msg = encodeURIComponent(
+    "Olá! Vim pelo site e gostaria de um orçamento de bateria. Meu veículo é: (modelo/ano)."
+  );
+  const href = `https://wa.me/553135321880?text=${msg}`;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={`fixed bottom-5 right-5 inline-flex items-center gap-2 rounded-full px-5 py-3 font-semibold shadow-xl transition hover:scale-[1.02] focus:outline-none focus:ring-4 ${className}`}
+      style={{ background: COLORS.secondary, color: "#fff" }}
+      aria-label="Pedir orçamento no WhatsApp"
+    >
+      <MessageSquare size={20} />
+      Orçar no WhatsApp
+    </a>
+  );
+}
+
+function Header({
+  current,
+  onNavigate,
+}: {
+  current: string;
+  onNavigate: (k: string) => void;
+}) {
+  return (
+    <header
+      className="sticky top-0 z-50 border-b"
+      style={{ background: COLORS.bg, borderColor: COLORS.primary + "22" }}
+    >
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-3">
+          <img
+            src={LOGO_URL}
+            alt="Baterias Ramos"
+            className="h-10 w-10 rounded-lg object-contain"
+          />
+          <div>
+            <div
+              className="text-lg font-extrabold"
+              style={{ color: COLORS.textDark }}
+            >
+              Baterias Ramos
+            </div>
+            <div className="text-xs" style={{ color: COLORS.textMuted }}>
+              Desde 1979 • Betim/MG
+            </div>
+          </div>
+        </div>
+
+        <nav className="hidden items-center gap-6 md:flex">
+          {MENU.map((m) => (
+            <button
+              key={m.key}
+              onClick={() => onNavigate(m.key)}
+              className={`text-sm font-medium transition hover:opacity-90 ${
+                current === m.key ? "underline underline-offset-4" : ""
+              }`}
+              style={{ color: COLORS.text }}
+            >
+              {m.label}
+            </button>
+          ))}
+        </nav>
+
+        <a
+          href="https://wa.me/553135321880"
+          target="_blank"
+          rel="noreferrer"
+          className="hidden rounded-full px-5 py-2 text-sm font-semibold md:inline-flex"
+          style={{ background: COLORS.secondary, color: "#fff" }}
+        >
+          WhatsApp
+        </a>
+      </div>
+    </header>
+  );
+}
+
+function Hero({ onCTA }: { onCTA: () => void }) {
+  return (
+    <section
+      className="relative"
+      style={{
+        background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryDark} 50%, ${COLORS.secondaryDark} 100%)`,
+        color: "#fff",
+      }}
+    >
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
+        <div>
+          <h1 className="mb-4 text-3xl font-extrabold leading-tight md:text-5xl">
+            Baterias com entrega e instalação grátis em Betim
+          </h1>
+          <p className="mb-6 max-w-prose text-white/90">
+            Tradição desde 1979. Teste de bateria e alternador em minutos,
+            marcas líderes e atendimento ágil pelo WhatsApp.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={onCTA}
+              className="rounded-full px-6 py-3 text-sm font-semibold"
+              style={{ background: COLORS.secondary, color: "#fff" }}
+            >
+              Pedir orçamento no WhatsApp
+            </button>
+            <a
+              href="#servicos"
+              className="rounded-full px-6 py-3 text-sm font-semibold"
+              style={{ background: "#ffffff22" }}
+            >
+              Ver serviços
+            </a>
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={18} /> Garantia real
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap size={18} /> Entrega ágil em toda Betim
+            </div>
+            <div className="flex items-center gap-2">
+              <Wrench size={18} /> Instalação grátis
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock size={18} /> Seg–Sex 08h–18h • Sáb 08h–12h
+            </div>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div
+            className="rounded-2xl p-1 shadow-2xl"
+            style={{ background: "#ffffff22" }}
+          >
+            <div className="rounded-2xl bg-white p-6 text-left text-slate-700">
+              <div className="mb-4 flex items-center gap-2">
+                <img src={LOGO_URL} alt="Logo" className="h-6 w-6" />
+                <span className="font-semibold">Teste rápido de bateria</span>
+              </div>
+              <p className="text-sm text-slate-600">
+                Checamos a saúde da bateria e a carga do alternador. Se
+                precisar, trocamos na hora — onde você estiver em Betim.
+              </p>
+              <hr className="my-4" />
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs text-slate-500">Cobertura</div>
+                  <div className="font-semibold">Toda Betim</div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs text-slate-500">Taxa de entrega</div>
+                  <div className="font-semibold">Grátis</div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs text-slate-500">Instalação</div>
+                  <div className="font-semibold">Grátis</div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs text-slate-500">Marcas</div>
+                  <div className="font-semibold">
+                    Moura, Tudor, Cral, Júpiter, Sedna…
+                  </div>
+                </div>
+              </div>
+              <a
+                href="https://wa.me/553135321880"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
+                style={{ background: COLORS.primary, color: "#fff" }}
+              >
+                <Phone size={18} /> Chamar no WhatsApp
+              </a>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <img
+              src={HERO_IMG_1}
+              alt="Loja Baterias Ramos"
+              className="h-40 w-full rounded-xl object-cover"
+            />
+            <img
+              src={HERO_IMG_2}
+              alt="Equipe Baterias Ramos"
+              className="h-40 w-full rounded-xl object-cover"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Services() {
+  const items = [
+    {
+      icon: <Wrench />,
+      title: "Troca e instalação",
+      desc: "Instalação gratuita na sua casa ou trabalho em Betim.",
+    },
+    {
+      icon: <Zap />,
+      title: "Socorro com bateria",
+      desc: "Precisou agora? Vamos até você com rapidez.",
+    },
+    {
+      icon: <ShieldCheck />,
+      title: "Teste de bateria/alternador",
+      desc: "Diagnóstico preciso em minutos.",
+    },
+    {
+      icon: <BatteryIcon />,
+      title: "Recarga e refação de polo",
+      desc: "Recarga segura e refação de polo derretido.",
+    },
+    {
+      icon: <Car />,
+      title: "Linha leve e pesada",
+      desc: "Carro, moto e utilitários — várias amperagens.",
+    },
+    {
+      icon: <MapPin />,
+      title: "Coleta autorizada",
+      desc: "Ponto de coleta para descarte correto.",
+    },
+  ];
+  return (
+    <section id="servicos" className="bg-white">
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <h2
+          className="mb-8 text-2xl font-extrabold"
+          style={{ color: COLORS.textDark }}
+        >
+          Nossos serviços
+        </h2>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((it, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl border p-6 transition hover:shadow-lg"
+            >
+              <div
+                className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg"
+                style={{ background: COLORS.bgAlt }}
+              >
+                <div style={{ color: COLORS.primary }}>{it.icon}</div>
+              </div>
+              <div
+                className="text-lg font-semibold"
+                style={{ color: COLORS.text }}
+              >
+                {it.title}
+              </div>
+              <p className="mt-1 text-sm" style={{ color: COLORS.textMuted }}>
+                {it.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Brands() {
+  return (
+    <section
+      className="bg-[var(--bgAlt)]"
+      style={{ ["--bgAlt" as any]: COLORS.bgAlt }}
+    >
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <h2
+          className="mb-6 text-2xl font-extrabold"
+          style={{ color: COLORS.textDark }}
+        >
+          Marcas, amperagens e garantias
+        </h2>
+        <p className="mb-6 max-w-2xl text-sm" style={{ color: COLORS.textMuted }}>
+          Linha leve, pesada e motos. Trabalhamos com marcas líderes e opções
+          com melhor custo–benefício.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {BRANDS.map((b) => (
+            <span
+              key={b}
+              className="rounded-full px-4 py-2 text-sm font-medium"
+              style={{ background: COLORS.primary + "15", color: COLORS.text }}
+            >
+              {b}
+            </span>
+          ))}
+          <span
+            className="rounded-full bg-white px-4 py-2 text-sm font-medium ring-1"
+            style={{ color: COLORS.text, borderColor: COLORS.primary + "33" }}
+          >
+            40–100 Ah (linha leve) • opções p/ linha pesada
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Catalog() {
+  const [q, setQ] = useState("");
+  const [brand, setBrand] = useState("");
+  const [ah, setAh] = useState("");
+
+  const filtered = useMemo(() => {
+    return BATTERIES.filter(
+      (b) =>
+        (brand ? b.brand === brand : true) &&
+        (ah ? String(b.ah) === ah : true) &&
+        (q
+          ? (b.model + b.fit + b.brand).toLowerCase().includes(q.toLowerCase())
+          : true)
+    );
+  }, [q, brand, ah]);
+
+  const amps = Array.from(new Set(BATTERIES.map((b) => b.ah))).sort(
+    (a, b) => a - b
+  );
+
+  return (
+    <section className="bg-white">
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <h2
+            className="text-2xl font-extrabold"
+            style={{ color: COLORS.textDark }}
+          >
+            Catálogo de baterias
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+              <Filter size={16} />
+              <input
+                aria-label="Buscar no catálogo"
+                placeholder="Buscar modelo/veículo"
+                className="min-w-[220px] outline-none"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
+            <select
+              className="rounded-lg border px-3 py-2"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              aria-label="Filtrar por marca"
+            >
+              <option value="">Todas as marcas</option>
+              {BRANDS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            <select
+              className="rounded-lg border px-3 py-2"
+              value={ah}
+              onChange={(e) => setAh(e.target.value)}
+              aria-label="Filtrar por amperagem"
+            >
+              <option value="">Todas as amperagens</option>
+              {amps.map((a) => (
+                <option key={a} value={String(a)}>
+                  {a} Ah
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((b) => (
+            <div key={b.id} className="rounded-2xl border p-6">
+              <div className="mb-2 text-xs" style={{ color: COLORS.textMuted }}>
+                {b.brand}
+              </div>
+              <div className="text-lg font-semibold" style={{ color: COLORS.text }}>
+                {b.model} — {b.ah} Ah
+              </div>
+              <div className="text-sm" style={{ color: COLORS.textMuted }}>
+                Garantia: {b.guarantee || "Consultar"} • Veículos: {b.fit}
+              </div>
+              <a
+                href={`https://wa.me/553135321880?text=${encodeURIComponent(
+                  `Olá! Quero ${b.brand} ${b.model} ${b.ah}Ah para ${b.fit}.`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
+                style={{ background: COLORS.primary, color: "#fff" }}
+              >
+                Pedir orçamento
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const FAQ_ITEMS = [
+  {
+    q: "Quando devo trocar a bateria?",
+    a: "Em média a cada 2–4 anos, ou antes se notar partida fraca, luzes oscilando e acessórios falhando.",
+  },
+  {
+    q: "Posso usar amperagem maior?",
+    a: "Siga a recomendação do fabricante. Em alguns carros, usar maior pode sobrecarregar o alternador.",
+  },
+  {
+    q: "Como saber se o alternador está carregando?",
+    a: "Com o motor ligado, a tensão geralmente fica entre 13,8 V e 14,4 V. Fazemos esse teste para você.",
+  },
+];
+
+function FAQ() {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <section className="bg-white">
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <h2
+          className="mb-6 text-2xl font-extrabold"
+          style={{ color: COLORS.textDark }}
+        >
+          Dúvidas frequentes
+        </h2>
+        <div className="divide-y rounded-2xl border">
+          {FAQ_ITEMS.map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => setOpen(open === idx ? null : idx)}
+              className="w-full p-4 text-left hover:bg-slate-50"
+              aria-expanded={open === idx}
+            >
+              <div className="flex items-center justify-between">
+                <div className="font-semibold" style={{ color: COLORS.text }}>
+                  {item.q}
+                </div>
+                {open === idx ? <ChevronDown /> : <ChevronRight />}
+              </div>
+              {open === idx && (
+                <div className="pt-2 text-sm" style={{ color: COLORS.textMuted }}>
+                  {item.a}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function About() {
+  return (
+    <section
+      className="bg-[var(--bgAlt)]"
+      style={{ ["--bgAlt" as any]: COLORS.bgAlt }}
+    >
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <h2
+          className="mb-6 text-2xl font-extrabold"
+          style={{ color: COLORS.textDark }}
+        >
+          Sobre a Baterias Ramos
+        </h2>
+        <p
+          className="max-w-3xl text-sm leading-relaxed"
+          style={{ color: COLORS.text }}
+        >
+          Somos uma empresa familiar, pioneira em Betim/MG, com mais de 45 anos
+          de história. Construímos nossa reputação com{" "}
+          <strong>tradição, transparência, confiança e responsabilidade</strong>.
+          Atendemos com rapidez e eficiência, levando até você as melhores
+          marcas e a amperagem certa para o seu veículo, com{" "}
+          <strong>entrega e instalação grátis</strong> em toda Betim.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {["45+ anos de história", "Especialistas em baterias", "Garantia de verdade", "Entrega ágil"].map(
+            (t, i) => (
+              <div
+                key={i}
+                className="rounded-xl border p-4 text-center text-sm font-medium"
+                style={{ color: COLORS.text }}
+              >
+                {t}
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Contact() {
+  const handleWA = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const form = (e.currentTarget.form as HTMLFormElement)!;
+    const nome = (form.elements.namedItem("nome") as HTMLInputElement)?.value;
+    const veiculo = (form.elements.namedItem("veiculo") as HTMLInputElement)
+      ?.value;
+    const bairro = (form.elements.namedItem("bairro") as HTMLInputElement)
+      ?.value;
+    const msg = encodeURIComponent(
+      `Olá! Sou ${nome}. Veículo: ${veiculo}. Bairro: ${bairro}. Quero informações sobre bateria.`
+    );
+    window.open(`https://wa.me/553135321880?text=${msg}`, "_blank");
+  };
+
+  return (
+    <section
+      className="bg-[var(--bgAlt)]"
+      style={{ ["--bgAlt" as any]: COLORS.bgAlt }}
+    >
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <h2
+          className="mb-6 text-2xl font-extrabold"
+          style={{ color: COLORS.textDark }}
+        >
+          Contato
+        </h2>
+        <div className="grid gap-8 md:grid-cols-2">
+          <div className="rounded-2xl border bg-white p-6">
+            <div
+              className="mb-4 flex items-center gap-2 text-sm"
+              style={{ color: COLORS.text }}
+            >
+              <MapPin size={18} /> Av. Bandeirantes, 78, Centro – Betim/MG
+            </div>
+            <div
+              className="mb-4 flex items-center gap-2 text-sm"
+              style={{ color: COLORS.text }}
+            >
+              <Phone size={18} /> (31) 3532-1880 — bateriasramos79@gmail.com
+            </div>
+            <div
+              className="mb-6 flex items-center gap-2 text-sm"
+              style={{ color: COLORS.text }}
+            >
+              <Clock size={18} /> Seg–Sex 08h–18h • Sáb 08h–12h • Dom fechado
+            </div>
+            <div className="aspect-video w-full overflow-hidden rounded-xl">
+              <iframe
+                title="Mapa Baterias Ramos"
+                className="h-full w-full"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps?q=Av.%20Bandeirantes%2C%2078%2C%20Centro%20-%20Betim&output=embed"
+              />
+            </div>
+            <a
+              href="https://g.page/r/Cc2gy9zewry_EB0/review"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold"
+              style={{ background: COLORS.primary, color: "#fff" }}
+            >
+              Deixe sua avaliação no Google
+            </a>
+          </div>
+
+          <form className="rounded-2xl border bg-white p-6">
+            <div className="mb-4 text-sm" style={{ color: COLORS.text }}>
+              Precisa de ajuda agora? Envie seus dados que te chamamos no
+              WhatsApp.
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm">
+                Nome
+                <input
+                  name="nome"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder="Seu nome"
+                />
+              </label>
+              <label className="text-sm">
+                Modelo/Ano do veículo
+                <input
+                  name="veiculo"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder="Ex.: Gol 2019"
+                />
+              </label>
+              <label className="text-sm sm:col-span-2">
+                Bairro/Cidade
+                <input
+                  name="bairro"
+                  className="mt-1 w-full rounded-lg border px-3 py-2"
+                  placeholder="Centro, Betim"
+                />
+              </label>
+            </div>
+            <button
+              onClick={handleWA}
+              className="mt-4 w-full rounded-lg px-4 py-3 font-semibold"
+              style={{ background: COLORS.secondary, color: "#fff" }}
+            >
+              Enviar e falar no WhatsApp
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer
+      className="border-t"
+      style={{ borderColor: COLORS.primary + "22", background: COLORS.bg }}
+    >
+      <div
+        className="mx-auto max-w-6xl px-4 py-10 text-sm"
+        style={{ color: COLORS.text }}
+      >
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div>
+            <div className="font-bold">Baterias Ramos</div>
+            <div className="text-slate-500">Desde 1979 • Betim/MG</div>
+          </div>
+          <div className="flex gap-6">
+            <a
+              href="https://instagram.com"
+              aria-label="Instagram"
+              className="hover:opacity-80"
+            >
+              <Instagram size={18} />
+            </a>
+            <a
+              href="https://facebook.com"
+              aria-label="Facebook"
+              className="hover:opacity-80"
+            >
+              <Facebook size={18} />
+            </a>
+          </div>
+        </div>
+        <div className="mt-6 text-xs text-slate-500">
+          © {new Date().getFullYear()} Baterias Ramos. Todos os direitos
+          reservados.
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default function App() {
+  const [page, setPage] = useState("home");
+  const goWA = () => window.open("https://wa.me/553135321880", "_blank");
+
+  return (
+    <div className="min-h-screen" style={{ background: COLORS.bg, color: COLORS.text }}>
+      <Helmet>
+        <html lang="pt-BR" />
+        <title>Baterias Ramos — Entrega e instalação grátis em Betim</title>
+        <meta
+          name="description"
+          content="Baterias automotivas com entrega e instalação grátis em Betim. Marcas líderes, teste de bateria/alternador e atendimento rápido no WhatsApp."
+        />
+        <link rel="icon" href={LOGO_URL} />
+        <meta property="og:title" content="Baterias Ramos — Betim" />
+        <meta
+          property="og:description"
+          content="Desde 1979 com tradição, transparência e entrega ágil em toda Betim."
+        />
+        {/* JSON-LD LocalBusiness */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "AutoPartsStore",
+              name: "Baterias Ramos",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Av. Bandeirantes, 78",
+                addressLocality: "Betim",
+                addressRegion: "MG",
+                addressCountry: "BR",
+              },
+              telephone: "+55-31-3532-1880",
+              openingHours: ["Mo-Fr 08:00-18:00", "Sa 08:00-12:00"],
+              url: "https://bateriasramos.com",
+            }),
+          }}
+        />
+      </Helmet>
+
+      <Header current={page} onNavigate={setPage} />
+
+      {page === "home" && (
+        <>
+          <Hero onCTA={goWA} />
+          <Services />
+          <Brands />
+          <FAQ />
+        </>
+      )}
+
+      {page === "baterias" && (
+        <>
+          <Catalog />
+          <FAQ />
+        </>
+      )}
+
+      {page === "sobre" && (
+        <>
+          <About />
+          <Services />
+        </>
+      )}
+
+      {page === "contato" && <Contact />}
+
+      <Footer />
+      <WhatsAppButton />
+    </div>
+  );
+}
